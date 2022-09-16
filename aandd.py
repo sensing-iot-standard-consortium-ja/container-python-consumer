@@ -1,17 +1,20 @@
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Tuple, List, Any
-from main import SchemaField
+
+from stdclasses import SchemaField
+
+
+_tzinfo = timezone(timedelta(hours=9))
 
 
 def _decode_aandd_time(_byte_data: bytes) -> datetime:
-    _tzinfo = timezone(timedelta(hours=9))
     _data: int = int.from_bytes(_byte_data, "big", signed=False)
-    _year = ((_data & 0b111) << 3) + (_data >> 29) + 2005
-    _month = ((_data & 0x1E000000) >> 25) + 1
-    _day = (_data & 0x1F00000) >> 20
-    _hour = (_data & 0xF8000) >> 15
-    _minute = (_data & 0x7E00) >> 9
-    _second = (_data & 0x1F8) >> 3
+    _year: int = ((_data & 0b111) << 3) + (_data >> 29) + 2005
+    _month: int = ((_data & 0x1E000000) >> 25) + 1
+    _day: int = (_data & 0x1F00000) >> 20
+    _hour: int = (_data & 0xF8000) >> 15
+    _minute: int = (_data & 0x7E00) >> 9
+    _second: int = (_data & 0x1F8) >> 3
     return datetime(_year, _month, _day, _hour, _minute, _second, tzinfo=_tzinfo)
 
 

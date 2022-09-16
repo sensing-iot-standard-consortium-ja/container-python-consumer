@@ -1,14 +1,14 @@
 import os
 import json
 import struct
-from confluent_kafka import Consumer, Producer
-from log import logger
-
-from dataclasses import dataclass
-from typing import Dict, Tuple, List, Any, Callable
 from functools import cache
+from typing import Dict, Tuple, List, Callable
 
 import requests
+from confluent_kafka import Consumer, Producer
+
+from log import logger
+from stdclasses import SchemaField, RawContainer
 
 iot_schema_registory = os.getenv("IOT_SCHEMA_REGISTORY", "https://registry.iotbase.in")
 logger.info(f"IOT_SCHEMA_REGISTORY: {iot_schema_registory}")
@@ -19,27 +19,6 @@ logger.info(f"KAFKA_BROKER: {kafka_broker}")
 subscribe_topic_txt = os.getenv("SUBSCRIBE_TOPIC", "")
 subscribe_topics = subscribe_topic_txt.split(",")
 logger.info(f"SUBSCRIBE_TOPIC: {subscribe_topics}")
-
-
-@dataclass
-class RawContainer:
-    type: bytes
-    length: bytes
-    data_index: bytes
-    data_id_length: bytes
-    data_id: bytes
-    payload: bytes
-
-
-@dataclass
-class SchemaField:
-    name: str
-    type: str
-    pos: int
-    length: int
-    tags: dict
-    payload: bytes
-    data: Any
 
 
 class AppException(Exception):
@@ -148,7 +127,6 @@ def extract(payload: bytes, schema):
     return fields
 
 
-
 from aandd import user_process_aandd_acce
 from aandd import user_process_aandd_bloodpressure
 from aandd import user_process_aandd_temp
@@ -156,11 +134,11 @@ from aandd import user_process_aandd_weight
 from aandd import user_process_aandd_summary
 
 user_function: Dict[Tuple[bytes, bytes], Callable] = {
-     (b"\x03", b'498104615159700'): user_process_aandd_summary,
-     (b"\x03", b'498104615159701'): user_process_aandd_acce,
-     (b"\x03", b'498104602619200'): user_process_aandd_bloodpressure,
-     (b"\x03", b'498104630619500'): user_process_aandd_temp,
-     (b"\x03", b'498104614337000'): user_process_aandd_weight,
+    (b"\x03", b"498104615159700"): user_process_aandd_summary,
+    (b"\x03", b"498104615159701"): user_process_aandd_acce,
+    (b"\x03", b"498104602619200"): user_process_aandd_bloodpressure,
+    (b"\x03", b"498104630619500"): user_process_aandd_temp,
+    (b"\x03", b"498104614337000"): user_process_aandd_weight,
 }
 
 
@@ -190,15 +168,17 @@ def main():
         schema: json = retrive((c.data_index, c.data_id))
         structured: List[SchemaField] = extract(c.payload, schema)
 
-        msg.topic()
+        user_process = user_function[(c.data_index, c.data_id)]
+        items: List = user_process(structured)
 
-        items = user_process_aandd(structured)
+        # 処理したjsonを出力
+        topic = f"json_{msg.topic()[10:]}"  # container_ を除去
         for item in items:
-            producer.send(, item)
+            producer.produce(topic, json.dumps(item))
 
 
 if __name__ == "__main__":
     try:
-        pass
+        main()
     except (InterruptedError):
         pass

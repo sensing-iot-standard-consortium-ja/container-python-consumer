@@ -36,7 +36,7 @@ optional = false
 python-versions = ">=3.6.0"
 
 [package.extras]
-unicode_backport = ["unicodedata2"]
+unicode_backport = ["unconficodedata2"]
 
 [[package]]
 name = "click"

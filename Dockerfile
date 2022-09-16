@@ -15,3 +15,4 @@ FROM python as runtime
 ENV PATH="/app/.venv/bin:$PATH"
 COPY --from=poetry /app/.venv /app/.venv
 COPY ./ /app
+CMD ["python", "main.py"]

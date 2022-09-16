@@ -148,7 +148,6 @@ def main():
         {
             "group.id": "hogehoge",
             "auto.offset.reset": "earliest",
-            "enable.auto.commit": False,
             "bootstrap.servers": kafka_broker,
         }
     )
@@ -164,17 +163,22 @@ def main():
         if msg.error():
             logger.error("kafka error")
             continue
-        c: RawContainer = parse(msg.value())
-        schema: json = retrive((c.data_index, c.data_id))
-        structured: List[SchemaField] = extract(c.payload, schema)
+        try:
+            c: RawContainer = parse(msg.value())
+            schema: json = retrive((c.data_index, c.data_id))
+            structured: List[SchemaField] = extract(c.payload, schema)
 
-        user_process = user_function[(c.data_index, c.data_id)]
-        items: List = user_process(structured)
+            user_process = user_function[(c.data_index, c.data_id)]
+            items: List = user_process(structured)
+            logger.info(f"topic:{msg.topic()} offset:{msg.offset()} proessed")
 
-        # 処理したjsonを出力
-        topic = f"json_{msg.topic()[10:]}"  # container_ を除去
-        for item in items:
-            producer.produce(topic, json.dumps(item))
+            # 処理したjsonを出力
+            topic = f"json_{msg.topic()[10:]}"  # container_ を除去
+            for item in items:
+                producer.produce(topic, json.dumps(item))
+            producer.flush()
+        except:
+            logger.error(f"topic:{msg.topic()} offset:{msg.offset()} error!!")
 
 
 if __name__ == "__main__":

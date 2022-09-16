@@ -1,0 +1,5 @@
+# this file for build
+services:
+  app:
+    image: public.ecr.aws/l1b7e4q9/testlab-edge:0.0.5
+    build: .

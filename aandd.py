@@ -58,7 +58,7 @@ def user_process_aandd_bloodpressure(structured: List[SchemaField]):
     pul: int = find(structured, "pul").data
     year: int = find(structured, "year").data
     month: int = find(structured, "month").data
-    day: int = find(structured, "month").data
+    day: int = find(structured, "day").data
     hour: int = find(structured, "hour").data
     minute: int = find(structured, "minute").data
     second: int = find(structured, "second").data
@@ -82,7 +82,7 @@ def user_process_aandd_temp(structured: List[SchemaField]):
     temp: float = temp_mantissa * (10**temp_exp)
     year: int = find(structured, "year").data
     month: int = find(structured, "month").data
-    day: int = find(structured, "month").data
+    day: int = find(structured, "day").data
     hour: int = find(structured, "hour").data
     minute: int = find(structured, "minute").data
     second: int = find(structured, "second").data
@@ -96,7 +96,7 @@ def user_process_aandd_weight(structured: List[SchemaField]):
     weight: float = find(structured, "weight").data / 200
     year: int = find(structured, "year").data
     month: int = find(structured, "month").data
-    day: int = find(structured, "month").data
+    day: int = find(structured, "day").data
     hour: int = find(structured, "hour").data
     minute: int = find(structured, "minute").data
     second: int = find(structured, "second").data

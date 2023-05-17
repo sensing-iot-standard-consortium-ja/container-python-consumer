@@ -110,7 +110,7 @@ def convert(type: str, payload: bytes, tags):
         logger.error("error occured in extract")
 
 
-def extract(payload: bytes, schema):
+def extract(payload: bytes, schema) -> List[SchemaField]:
     """コンテナのPayloadをスキーマに従って構造化する"""
     fields = []
     for field in schema.get("fields", []):
@@ -127,6 +127,7 @@ def extract(payload: bytes, schema):
     return fields
 
 
+from basic_process import basic_keyvalue
 from aandd import user_process_aandd_acce
 from aandd import user_process_aandd_bloodpressure
 from aandd import user_process_aandd_temp
@@ -168,7 +169,7 @@ def main():
             schema: json = retrive((c.data_index, c.data_id))
             structured: List[SchemaField] = extract(c.payload, schema)
 
-            user_process = user_function[(c.data_index, c.data_id)]
+            user_process = user_function.get((c.data_index, c.data_id), basic_keyvalue)
             items: List = user_process(structured)
             logger.info(f"topic:{msg.topic()} offset:{msg.offset()} proessed")
 

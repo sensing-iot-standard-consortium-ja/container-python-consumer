@@ -1,8 +1,4 @@
-FROM python:3-slim as python
-ENV PYTHONUNBUFFERED=true
-WORKDIR /app
-
-FROM python as poetry
+FROM python:3.10-slim as poetry
 ENV POETRY_HOME=/opt/poetry
 ENV POETRY_VIRTUALENVS_IN_PROJECT=true
 ENV PATH="$POETRY_HOME/bin:$PATH"
@@ -11,8 +7,10 @@ COPY ./pyproject.toml ./
 COPY ./poetry.lock ./
 RUN poetry install --no-interaction --no-ansi -vvv
 
-FROM python as runtime
+FROM python:3.10-slim as runtime
+ENV PYTHONUNBUFFERED=true
+WORKDIR /app
 ENV PATH="/app/.venv/bin:$PATH"
-COPY --from=poetry /app/.venv /app/.venv
+COPY --from=poetry /.venv /app/.venv
 COPY ./ /app
 CMD ["python", "main.py"]
